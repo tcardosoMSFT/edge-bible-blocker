@@ -1,8 +1,7 @@
 ---
 on:
-  push:
+  pull_request:
     branches: [master]
-  workflow_dispatch:
 
 permissions:
   contents: read
