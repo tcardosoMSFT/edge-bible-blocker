@@ -1,6 +1,6 @@
 {
   "name": "@tcardosomsft/edge-bible-blocker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Edge/Chrome extension that blocks distracting websites and displays inspirational Bible verses",
   "main": "background.js",
   "files": [
