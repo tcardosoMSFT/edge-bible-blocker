@@ -32,6 +32,8 @@ safe-outputs:
           required: true
           type: string
       steps:
+        - name: Checkout repository
+          uses: actions/checkout@v4
         - name: Setup Node.js
           uses: actions/setup-node@v4
           with:
@@ -41,7 +43,6 @@ safe-outputs:
           env:
             NODE_AUTH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           run: |
-            cd "$GITHUB_WORKSPACE"
             zip -r edge-bible-blocker.zip manifest.json background.js bible-verses.js blocked.html blocked.css blocked.js popup.html popup.css popup.js icons/
             npm publish
 ---

@@ -22,7 +22,7 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"c419b21e09493f7a35b8cb5c57384b7c9a2354b9bff12592fd32bab63e3a03fc","compiler_version":"v0.57.2","strict":true}
+# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"933886e6121642162490d8ac0922d8e8dd277c4f553ae51996c063d1b949231f","compiler_version":"v0.57.2","strict":true}
 
 name: "Package Extension"
 "on":
@@ -1182,6 +1182,8 @@ jobs:
         run: |
           find "/opt/gh-aw/safe-jobs/" -type f -print
           echo "GH_AW_AGENT_OUTPUT=/opt/gh-aw/safe-jobs/agent_output.json" >> "$GITHUB_ENV"
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
@@ -1189,7 +1191,6 @@ jobs:
           registry-url: https://npm.pkg.github.com
       - name: Create zip and publish
         run: |
-          cd "$GITHUB_WORKSPACE"
           zip -r edge-bible-blocker.zip manifest.json background.js bible-verses.js blocked.html blocked.css blocked.js popup.html popup.css popup.js icons/
           npm publish
         env:
