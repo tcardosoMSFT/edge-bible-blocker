@@ -22,7 +22,7 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"e1fc6fbfbd1bcc534caed22389e3a1e3a0d792ae873958ebe96da05456143457","compiler_version":"v0.57.2","strict":true}
+# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"7dfbf4de17484412bfaeaae52bc4f1cad2b01f85663013bf55ecefc109a4b9eb","compiler_version":"v0.57.2","strict":true}
 
 name: "Package Extension"
 "on":
@@ -328,7 +328,7 @@ jobs:
           mkdir -p /tmp/gh-aw/safeoutputs
           mkdir -p /tmp/gh-aw/mcp-logs/safeoutputs
           cat > /opt/gh-aw/safeoutputs/config.json << 'GH_AW_SAFE_OUTPUTS_CONFIG_EOF'
-          {"create_issue":{"max":1},"missing_data":{},"missing_tool":{},"noop":{"max":1},"npm-publish":{"description":"Publish the extension zip as an npm package to GitHub Packages","inputs":{"version":{"default":null,"description":"The extension version from manifest.json","required":true,"type":"string"}},"output":"Package published to GitHub Packages successfully!"},"upload_asset":{"max":1}}
+          {"create-release":{"description":"Create a GitHub Release with the extension zip attached","inputs":{"release_notes":{"default":null,"description":"Markdown release notes describing what changed","required":true,"type":"string"},"version":{"default":null,"description":"The release version tag (e.g. v1.0.1)","required":true,"type":"string"}},"output":"GitHub Release created with extension zip attached!"},"create_issue":{"max":1},"missing_data":{},"missing_tool":{},"noop":{"max":1},"npm-publish":{"description":"Publish the extension zip as an npm package to GitHub Packages","inputs":{"version":{"default":null,"description":"The extension version from manifest.json","required":true,"type":"string"}},"output":"Package published to GitHub Packages successfully!"},"upload_asset":{"max":1}}
           GH_AW_SAFE_OUTPUTS_CONFIG_EOF
           cat > /opt/gh-aw/safeoutputs/tools.json << 'GH_AW_SAFE_OUTPUTS_TOOLS_EOF'
           [
@@ -498,6 +498,28 @@ jobs:
                 "type": "object"
               },
               "name": "missing_data"
+            },
+            {
+              "description": "Create a GitHub Release with the extension zip attached",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "release_notes": {
+                    "description": "Markdown release notes describing what changed",
+                    "type": "string"
+                  },
+                  "version": {
+                    "description": "The release version tag (e.g. v1.0.1)",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "release_notes",
+                  "version"
+                ],
+                "type": "object"
+              },
+              "name": "create_release"
             },
             {
               "description": "Publish the extension zip as an npm package to GitHub Packages",
@@ -1064,6 +1086,7 @@ jobs:
     needs:
       - activation
       - agent
+      - create_release
       - npm_publish
       - safe_outputs
       - upload_assets
@@ -1163,6 +1186,58 @@ jobs:
             setupGlobals(core, github, context, exec, io);
             const { main } = require('/opt/gh-aw/actions/handle_noop_message.cjs');
             await main();
+
+  create_release:
+    needs: agent
+    if: ((!cancelled()) && (needs.agent.result != 'skipped')) && (contains(needs.agent.outputs.output_types, 'create_release'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download agent output artifact
+        continue-on-error: true
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8
+        with:
+          name: agent-output
+          path: /opt/gh-aw/safe-jobs/
+      - name: Setup Safe Job Environment Variables
+        run: |
+          find "/opt/gh-aw/safe-jobs/" -type f -print
+          echo "GH_AW_AGENT_OUTPUT=/opt/gh-aw/safe-jobs/agent_output.json" >> "$GITHUB_ENV"
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Create extension zip
+        run: |
+          zip -r edge-bible-blocker.zip \
+            manifest.json \
+            background.js \
+            bible-verses.js \
+            blocked.html \
+            blocked.css \
+            blocked.js \
+            popup.html \
+            popup.css \
+            popup.js \
+            icons/
+      - name: Create GitHub Release with zip
+        run: |
+          if [ -f "$GH_AW_AGENT_OUTPUT" ]; then
+            VERSION=$(cat "$GH_AW_AGENT_OUTPUT" | jq -r '.items[] | select(.type == "create_release") | .version')
+            NOTES=$(cat "$GH_AW_AGENT_OUTPUT" | jq -r '.items[] | select(.type == "create_release") | .release_notes')
+          else
+            VERSION="$RELEASE_VERSION"
+            NOTES="$RELEASE_NOTES"
+          fi
+          echo "🏷️ Creating release $VERSION..."
+          gh release create "$VERSION" \
+            edge-bible-blocker.zip \
+            --title "Bible Site Blocker $VERSION" \
+            --notes "$NOTES" \
+            --latest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_NOTES: ${{ inputs.release_notes }}
+          RELEASE_VERSION: ${{ inputs.version }}
 
   npm_publish:
     needs: agent

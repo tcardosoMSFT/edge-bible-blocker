@@ -66,6 +66,56 @@ safe-outputs:
           with:
             name: edge-bible-blocker-extension
             path: edge-bible-blocker.zip
+    create-release:
+      description: "Create a GitHub Release with the extension zip attached"
+      runs-on: ubuntu-latest
+      output: "GitHub Release created with extension zip attached!"
+      permissions:
+        contents: write
+      inputs:
+        version:
+          description: "The release version tag (e.g. v1.0.1)"
+          required: true
+          type: string
+        release_notes:
+          description: "Markdown release notes describing what changed"
+          required: true
+          type: string
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v4
+        - name: Create extension zip
+          run: |
+            zip -r edge-bible-blocker.zip \
+              manifest.json \
+              background.js \
+              bible-verses.js \
+              blocked.html \
+              blocked.css \
+              blocked.js \
+              popup.html \
+              popup.css \
+              popup.js \
+              icons/
+        - name: Create GitHub Release with zip
+          env:
+            GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+            RELEASE_VERSION: "${{ inputs.version }}"
+            RELEASE_NOTES: "${{ inputs.release_notes }}"
+          run: |
+            if [ -f "$GH_AW_AGENT_OUTPUT" ]; then
+              VERSION=$(cat "$GH_AW_AGENT_OUTPUT" | jq -r '.items[] | select(.type == "create_release") | .version')
+              NOTES=$(cat "$GH_AW_AGENT_OUTPUT" | jq -r '.items[] | select(.type == "create_release") | .release_notes')
+            else
+              VERSION="$RELEASE_VERSION"
+              NOTES="$RELEASE_NOTES"
+            fi
+            echo "🏷️ Creating release $VERSION..."
+            gh release create "$VERSION" \
+              edge-bible-blocker.zip \
+              --title "Bible Site Blocker $VERSION" \
+              --notes "$NOTES" \
+              --latest
 ---
 
 ## Package Bible Site Blocker and Publish to GitHub Packages
@@ -117,12 +167,26 @@ Upload `edge-bible-blocker.zip` using the `upload_asset` tool so it is available
 
 Read the `version` field from `manifest.json`, then call the `npm-publish` safe-job tool with that version. This will publish the package as `@tcardosomsft/edge-bible-blocker` to the GitHub npm registry.
 
-### Step 5: Report Results
+### Step 5: Create a GitHub Release
+
+Call the `create-release` safe-job tool with:
+- `version`: the version from manifest.json prefixed with `v` (e.g. `v1.0.1`)
+- `release_notes`: a markdown summary including:
+  - Extension name and version
+  - List of included files
+  - SHA256 checksum of the zip
+  - Download instructions
+  - Link to Edge Add-ons Partner Center for marketplace submission
+
+This will create a tagged GitHub Release with the extension zip attached for direct download.
+
+### Step 6: Report Results
 
 Create an issue summarizing:
 - ✅ Validation results (pass/fail for each check)
 - 📦 Package details (file count, zip size, SHA256 hash)
 - 🚀 npm publish status and package URL (`https://github.com/tcardosoMSFT/edge-bible-blocker/packages`)
+- 🏷️ GitHub Release URL (`https://github.com/tcardosoMSFT/edge-bible-blocker/releases`)
 - 📋 Next steps for manual submission to [Edge Add-ons Partner Center](https://partner.microsoft.com/dashboard/microsoftedge/public/login)
 - Include the version number from `manifest.json` in the issue title
 
