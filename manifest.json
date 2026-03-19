@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Bible Site Blocker",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Block distracting websites and be inspired by Bible verses",
   "permissions": [
     "declarativeNetRequest",
