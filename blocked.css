@@ -1,0 +1,241 @@
+/* ── Reset & Base ───────────────────────────────────── */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #6B8DD6 100%);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: #2d3748;
+  overflow: hidden;
+}
+
+/* ── Fade-in animation ─────────────────────────────── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0%   { opacity: 0.6; }
+  50%  { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+/* ── Container ─────────────────────────────────────── */
+.container {
+  text-align: center;
+  max-width: 600px;
+  width: 90%;
+  padding: 2rem;
+  animation: fadeInUp 0.8s ease-out both;
+}
+
+/* ── Shield icon (CSS-only) ────────────────────────── */
+.shield-icon {
+  position: relative;
+  width: 88px;
+  height: 100px;
+  margin: 0 auto 1.8rem;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 50% 50% 50% 50% / 30% 30% 70% 70%;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.35);
+  animation: fadeIn 1s ease-out both;
+}
+
+/* Cross inside the shield */
+.shield-icon::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 44px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 4px;
+  transform: translate(-50%, -50%);
+}
+
+.shield-icon::after {
+  content: '';
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  width: 30px;
+  height: 8px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 4px;
+  transform: translate(-50%, -50%);
+}
+
+/* ── Typography ────────────────────────────────────── */
+h1 {
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  letter-spacing: -0.02em;
+}
+
+.blocked-url {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: 2rem;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+/* ── Verse card ────────────────────────────────────── */
+.verse-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 2rem 2.2rem;
+  margin-bottom: 2rem;
+  box-shadow:
+    0 4px 24px rgba(102, 126, 234, 0.18),
+    0 1px 4px rgba(0, 0, 0, 0.06);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+.verse-card.fade-out {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.verse-text {
+  font-size: 1.15rem;
+  font-style: italic;
+  line-height: 1.75;
+  color: #4a5568;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.verse-text::before {
+  content: '\201C';
+  font-size: 3rem;
+  color: rgba(102, 126, 234, 0.25);
+  position: absolute;
+  top: -1rem;
+  left: -0.6rem;
+  font-family: Georgia, serif;
+  line-height: 1;
+}
+
+.verse-reference {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #667eea;
+  letter-spacing: 0.02em;
+}
+
+/* ── Buttons ───────────────────────────────────────── */
+.buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  animation: fadeInUp 0.8s ease-out 0.4s both;
+}
+
+.btn {
+  padding: 0.75rem 1.6rem;
+  border: none;
+  border-radius: 50px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  letter-spacing: 0.01em;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background: #fff;
+  color: #667eea;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:hover {
+  background: #667eea;
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.35);
+  border-color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+/* ── Responsive ────────────────────────────────────── */
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.4rem;
+  }
+
+  .verse-card {
+    padding: 1.5rem 1.4rem;
+  }
+
+  .verse-text {
+    font-size: 1rem;
+  }
+
+  .shield-icon {
+    width: 70px;
+    height: 80px;
+  }
+
+  .shield-icon::before {
+    height: 36px;
+    width: 7px;
+  }
+
+  .shield-icon::after {
+    width: 24px;
+    height: 7px;
+  }
+
+  .buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .btn {
+    width: 100%;
+    max-width: 220px;
+  }
+}

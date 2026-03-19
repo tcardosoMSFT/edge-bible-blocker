@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Site Blocked</title>
+  <link rel="stylesheet" href="blocked.css">
+</head>
+<body>
+  <div class="container">
+    <div class="shield-icon" aria-hidden="true"></div>
+    <h1>This site has been blocked</h1>
+    <p class="blocked-url" id="blocked-url"></p>
+
+    <div class="verse-card" id="verse-card">
+      <p class="verse-text" id="verse-text"></p>
+      <p class="verse-reference" id="verse-reference"></p>
+    </div>
+
+    <div class="buttons">
+      <button id="go-back-btn" class="btn btn-primary">← Go Back</button>
+      <button id="new-verse-btn" class="btn btn-secondary">✦ New Verse</button>
+    </div>
+  </div>
+
+  <script src="bible-verses.js"></script>
+  <script src="blocked.js"></script>
+</body>
+</html>

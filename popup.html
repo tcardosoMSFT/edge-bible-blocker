@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bible Site Blocker</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <header class="header">
+      <span class="header-icon">✝</span>
+      <h1 class="header-title">Bible Site Blocker</h1>
+    </header>
+
+    <div class="input-section">
+      <div class="input-wrapper">
+        <input type="text" id="site-input" placeholder="Enter website to block..." autocomplete="off" spellcheck="false">
+        <button id="block-btn" title="Block this site">Block</button>
+      </div>
+      <p id="error-msg" class="error-msg" hidden></p>
+    </div>
+
+    <div class="list-section">
+      <ul id="blocked-list" class="blocked-list"></ul>
+      <div id="empty-state" class="empty-state" hidden>
+        <span class="empty-icon">🕊️</span>
+        <p>No sites blocked yet. Add a site above!</p>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <p id="verse-text" class="verse-text"></p>
+      <p id="verse-ref" class="verse-ref"></p>
+    </footer>
+  </div>
+
+  <script src="bible-verses.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
