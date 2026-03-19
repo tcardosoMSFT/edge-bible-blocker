@@ -22,7 +22,7 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"3ca35c7a71c4a5e21b153644386f53a6fe73b1d3ce47bd142c1ac319b4bc93d9","compiler_version":"v0.57.2","strict":true}
+# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"c419b21e09493f7a35b8cb5c57384b7c9a2354b9bff12592fd32bab63e3a03fc","compiler_version":"v0.57.2","strict":true}
 
 name: "Package Extension"
 "on":
@@ -328,7 +328,7 @@ jobs:
           mkdir -p /tmp/gh-aw/safeoutputs
           mkdir -p /tmp/gh-aw/mcp-logs/safeoutputs
           cat > /opt/gh-aw/safeoutputs/config.json << 'GH_AW_SAFE_OUTPUTS_CONFIG_EOF'
-          {"create_issue":{"max":1},"missing_data":{},"missing_tool":{},"noop":{"max":1},"upload_asset":{"max":1}}
+          {"create_issue":{"max":1},"missing_data":{},"missing_tool":{},"noop":{"max":1},"npm-publish":{"description":"Publish the extension zip as an npm package to GitHub Packages","inputs":{"version":{"default":null,"description":"The extension version from manifest.json","required":true,"type":"string"}},"output":"Package published to GitHub Packages successfully!"},"upload_asset":{"max":1}}
           GH_AW_SAFE_OUTPUTS_CONFIG_EOF
           cat > /opt/gh-aw/safeoutputs/tools.json << 'GH_AW_SAFE_OUTPUTS_TOOLS_EOF'
           [
@@ -498,6 +498,23 @@ jobs:
                 "type": "object"
               },
               "name": "missing_data"
+            },
+            {
+              "description": "Publish the extension zip as an npm package to GitHub Packages",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "version": {
+                    "description": "The extension version from manifest.json",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "version"
+                ],
+                "type": "object"
+              },
+              "name": "npm_publish"
             }
           ]
           GH_AW_SAFE_OUTPUTS_TOOLS_EOF
@@ -1047,6 +1064,7 @@ jobs:
     needs:
       - activation
       - agent
+      - npm_publish
       - safe_outputs
       - upload_assets
     if: (always()) && (needs.agent.result != 'skipped')
@@ -1145,6 +1163,37 @@ jobs:
             setupGlobals(core, github, context, exec, io);
             const { main } = require('/opt/gh-aw/actions/handle_noop_message.cjs');
             await main();
+
+  npm_publish:
+    needs: agent
+    if: ((!cancelled()) && (needs.agent.result != 'skipped')) && (contains(needs.agent.outputs.output_types, 'npm_publish'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Download agent output artifact
+        continue-on-error: true
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8
+        with:
+          name: agent-output
+          path: /opt/gh-aw/safe-jobs/
+      - name: Setup Safe Job Environment Variables
+        run: |
+          find "/opt/gh-aw/safe-jobs/" -type f -print
+          echo "GH_AW_AGENT_OUTPUT=/opt/gh-aw/safe-jobs/agent_output.json" >> "$GITHUB_ENV"
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "20"
+          registry-url: https://npm.pkg.github.com
+      - name: Create zip and publish
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          zip -r edge-bible-blocker.zip manifest.json background.js bible-verses.js blocked.html blocked.css blocked.js popup.html popup.css popup.js icons/
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   pre_activation:
     if: (github.event_name != 'pull_request') || (github.event.pull_request.head.repo.id == github.repository_id)

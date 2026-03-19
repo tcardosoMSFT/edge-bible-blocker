@@ -18,11 +18,37 @@ safe-outputs:
   create-issue:
     title-prefix: "[edge-addon-package] "
     labels: [automation, packaging]
+  jobs:
+    npm-publish:
+      description: "Publish the extension zip as an npm package to GitHub Packages"
+      runs-on: ubuntu-latest
+      output: "Package published to GitHub Packages successfully!"
+      permissions:
+        contents: read
+        packages: write
+      inputs:
+        version:
+          description: "The extension version from manifest.json"
+          required: true
+          type: string
+      steps:
+        - name: Setup Node.js
+          uses: actions/setup-node@v4
+          with:
+            node-version: "20"
+            registry-url: "https://npm.pkg.github.com"
+        - name: Create zip and publish
+          env:
+            NODE_AUTH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          run: |
+            cd "$GITHUB_WORKSPACE"
+            zip -r edge-bible-blocker.zip manifest.json background.js bible-verses.js blocked.html blocked.css blocked.js popup.html popup.css popup.js icons/
+            npm publish
 ---
 
-## Package Bible Site Blocker for Edge Add-ons Marketplace
+## Package Bible Site Blocker and Publish to GitHub Packages
 
-You are a browser extension packaging assistant. Your job is to validate, package, and prepare the **Bible Site Blocker** extension for submission to the Microsoft Edge Add-ons Marketplace.
+You are a browser extension packaging assistant. Your job is to validate the **Bible Site Blocker** extension, package it as a zip, and publish it as an npm package to GitHub Packages.
 
 ### Step 1: Validate the Extension
 
@@ -44,44 +70,38 @@ You are a browser extension packaging assistant. Your job is to validate, packag
    - No remote code loading
    - Content Security Policy compliance
 
-### Step 2: Package the Extension
+### Step 2: Package the Extension as Zip
 
-1. Create a build directory:
+1. Create the zip package with only extension files:
    ```
-   mkdir -p build
-   ```
-
-2. Copy only the extension files (exclude `.git`, `.github`, `build`, `README.md`, `.gitignore`, `node_modules`):
-   ```
-   cp manifest.json background.js bible-verses.js blocked.html blocked.css blocked.js popup.html popup.css popup.js build/
-   cp -r icons build/
+   zip -r edge-bible-blocker.zip manifest.json background.js bible-verses.js blocked.html blocked.css blocked.js popup.html popup.css popup.js icons/
    ```
 
-3. Create the zip package from the build directory:
-   ```
-   cd build && zip -r ../edge-bible-blocker.zip . && cd ..
-   ```
-
-4. Compute and report the SHA256 checksum:
+2. Compute and report the SHA256 checksum:
    ```
    sha256sum edge-bible-blocker.zip
    ```
 
-5. Report the zip file size:
+3. Report the zip file size:
    ```
    wc -c edge-bible-blocker.zip
    ```
 
-### Step 3: Upload the Package
+### Step 3: Upload the Zip Asset
 
-Upload `edge-bible-blocker.zip` using the `upload_asset` tool so it is available for download and submission to the Edge Add-ons Marketplace.
+Upload `edge-bible-blocker.zip` using the `upload_asset` tool so it is available as a downloadable asset.
 
-### Step 4: Report Results
+### Step 4: Publish to GitHub Packages
+
+Read the `version` field from `manifest.json`, then call the `npm-publish` safe-job tool with that version. This will publish the package as `@tcardosomsft/edge-bible-blocker` to the GitHub npm registry.
+
+### Step 5: Report Results
 
 Create an issue summarizing:
 - ✅ Validation results (pass/fail for each check)
 - 📦 Package details (file count, zip size, SHA256 hash)
+- 🚀 npm publish status and package URL (`https://github.com/tcardosoMSFT/edge-bible-blocker/packages`)
 - 📋 Next steps for manual submission to [Edge Add-ons Partner Center](https://partner.microsoft.com/dashboard/microsoftedge/public/login)
 - Include the version number from `manifest.json` in the issue title
 
-If any validation fails, clearly describe the issue and suggest a fix.
+If any step fails, clearly describe the issue and suggest a fix.

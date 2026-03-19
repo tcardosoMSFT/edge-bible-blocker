@@ -1,0 +1,38 @@
+{
+  "name": "@tcardosomsft/edge-bible-blocker",
+  "version": "1.0.0",
+  "description": "Edge/Chrome extension that blocks distracting websites and displays inspirational Bible verses",
+  "main": "background.js",
+  "files": [
+    "edge-bible-blocker.zip",
+    "manifest.json",
+    "background.js",
+    "bible-verses.js",
+    "blocked.html",
+    "blocked.css",
+    "blocked.js",
+    "popup.html",
+    "popup.css",
+    "popup.js",
+    "icons/"
+  ],
+  "scripts": {
+    "package": "zip -r edge-bible-blocker.zip manifest.json background.js bible-verses.js blocked.html blocked.css blocked.js popup.html popup.css popup.js icons/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tcardosoMSFT/edge-bible-blocker.git"
+  },
+  "keywords": [
+    "edge-extension",
+    "chrome-extension",
+    "bible",
+    "site-blocker",
+    "productivity"
+  ],
+  "author": "tcardosoMSFT",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
+}
