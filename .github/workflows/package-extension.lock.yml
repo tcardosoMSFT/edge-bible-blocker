@@ -22,7 +22,7 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"933886e6121642162490d8ac0922d8e8dd277c4f553ae51996c063d1b949231f","compiler_version":"v0.57.2","strict":true}
+# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"e1fc6fbfbd1bcc534caed22389e3a1e3a0d792ae873958ebe96da05456143457","compiler_version":"v0.57.2","strict":true}
 
 name: "Package Extension"
 "on":
@@ -1189,12 +1189,33 @@ jobs:
         with:
           node-version: "20"
           registry-url: https://npm.pkg.github.com
-      - name: Create zip and publish
+      - name: Create extension zip package
         run: |
-          zip -r edge-bible-blocker.zip manifest.json background.js bible-verses.js blocked.html blocked.css blocked.js popup.html popup.css popup.js icons/
-          npm publish
+          echo "📦 Creating extension package zip..."
+          zip -r edge-bible-blocker.zip \
+            manifest.json \
+            background.js \
+            bible-verses.js \
+            blocked.html \
+            blocked.css \
+            blocked.js \
+            popup.html \
+            popup.css \
+            popup.js \
+            icons/
+          echo "✅ Extension zip contents:"
+          unzip -l edge-bible-blocker.zip
+          echo "📊 Package size: $(wc -c < edge-bible-blocker.zip) bytes"
+          echo "🔒 SHA256: $(sha256sum edge-bible-blocker.zip | cut -d' ' -f1)"
+      - name: Publish npm package to GitHub Packages
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload extension zip as artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: edge-bible-blocker-extension
+          path: edge-bible-blocker.zip
 
   pre_activation:
     if: (github.event_name != 'pull_request') || (github.event.pull_request.head.repo.id == github.repository_id)

@@ -39,12 +39,33 @@ safe-outputs:
           with:
             node-version: "20"
             registry-url: "https://npm.pkg.github.com"
-        - name: Create zip and publish
+        - name: Create extension zip package
+          run: |
+            echo "📦 Creating extension package zip..."
+            zip -r edge-bible-blocker.zip \
+              manifest.json \
+              background.js \
+              bible-verses.js \
+              blocked.html \
+              blocked.css \
+              blocked.js \
+              popup.html \
+              popup.css \
+              popup.js \
+              icons/
+            echo "✅ Extension zip contents:"
+            unzip -l edge-bible-blocker.zip
+            echo "📊 Package size: $(wc -c < edge-bible-blocker.zip) bytes"
+            echo "🔒 SHA256: $(sha256sum edge-bible-blocker.zip | cut -d' ' -f1)"
+        - name: Publish npm package to GitHub Packages
           env:
             NODE_AUTH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          run: |
-            zip -r edge-bible-blocker.zip manifest.json background.js bible-verses.js blocked.html blocked.css blocked.js popup.html popup.css popup.js icons/
-            npm publish
+          run: npm publish
+        - name: Upload extension zip as artifact
+          uses: actions/upload-artifact@v4
+          with:
+            name: edge-bible-blocker-extension
+            path: edge-bible-blocker.zip
 ---
 
 ## Package Bible Site Blocker and Publish to GitHub Packages
